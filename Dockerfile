@@ -1,22 +1,19 @@
-FROM python:2.7.12
-RUN echo "deb http://ftp.debian.org/debian jessie-backports main" >> /etc/apt/sources.list
-RUN apt-get update && apt-get install -y \
-    git
-
-RUN apt-get -t jessie-backports install -y "ffmpeg"
-
-
-RUN cd /tmp \
-    && git clone https://github.com/jakul/aggdraw.git \
-    && cd aggdraw \
-    && /usr/local/bin/python setup.py install
-
-
-COPY requirements.txt /tmp
-RUN pip install --no-cache-dir --requirement /tmp/requirements.txt
-
-RUN mkdir /app
-COPY . /app
-WORKDIR /app
-
-ENTRYPOINT ["python", "extract_scene.py"]
+FROM python:3.7
+RUN apt-get update \
+    && apt-get install -qqy --no-install-recommends \
+        apt-utils \
+        ffmpeg \
+        sox \
+        libcairo2-dev \
+        texlive \
+        texlive-fonts-extra \
+        texlive-latex-extra \
+        texlive-latex-recommended \
+        texlive-science \
+        tipa \
+    && rm -rf /var/lib/apt/lists/*
+COPY . /manim
+RUN cd /manim \
+    && python setup.py sdist \
+    && python -m pip install dist/manimlib*
+ENTRYPOINT ["/bin/bash"]
